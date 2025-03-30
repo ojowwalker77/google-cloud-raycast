@@ -27,6 +27,7 @@ export default function IAMPrincipalDetail({ principal, iamService, onRoleRemove
     }
   }
 
+<<<<<<< HEAD
   // Get icon for principal type
   function getPrincipalIcon(type: string): string {
     switch (type) {
@@ -43,6 +44,8 @@ export default function IAMPrincipalDetail({ principal, iamService, onRoleRemove
     }
   }
 
+=======
+>>>>>>> 21d012a (v0.2.32)
   // Handle role removal
   async function handleRemoveRole(role: string) {
     const confirmed = await confirmAlert({
@@ -79,7 +82,11 @@ export default function IAMPrincipalDetail({ principal, iamService, onRoleRemove
   const markdown = `
   # ${principal.displayName || principal.email || principal.id || "Unknown Principal"}
   
+<<<<<<< HEAD
   ${getPrincipalIcon(principal.type)} **${formatPrincipalType(principal.type)}**
+=======
+  **Type:** ${formatPrincipalType(principal.type)}
+>>>>>>> 21d012a (v0.2.32)
   
   **ID:** \`${principal.id || "N/A"}\`
   ${principal.email ? `**Email:** ${principal.email}` : ""}

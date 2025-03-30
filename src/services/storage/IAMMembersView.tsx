@@ -15,6 +15,10 @@ import {
 import { useState, useEffect } from "react";
 import { executeGcloudCommand } from "../../gcloud";
 import { getRoleInfo, formatRoleName } from "../../utils/iamRoles";
+<<<<<<< HEAD
+=======
+import { showFailureToast } from "@raycast/utils";
+>>>>>>> 21d012a (v0.2.32)
 
 interface IAMMembersViewProps {
   projectId: string;
@@ -79,10 +83,14 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
       if (!Array.isArray(result) || result.length === 0) {
         setError("No IAM policy found or empty result");
         setIsLoading(false);
+<<<<<<< HEAD
         showToast({
           style: Toast.Style.Failure,
           title: "No IAM policy found",
         });
+=======
+        showFailureToast("No IAM policy found");
+>>>>>>> 21d012a (v0.2.32)
         return;
       }
 
@@ -91,8 +99,12 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
       if (!policy.bindings || !Array.isArray(policy.bindings)) {
         setError("Invalid IAM policy format: no bindings found");
         setIsLoading(false);
+<<<<<<< HEAD
         showToast({
           style: Toast.Style.Failure,
+=======
+        showFailureToast({
+>>>>>>> 21d012a (v0.2.32)
           title: "Invalid IAM policy format",
           message: "No bindings found",
         });
@@ -133,11 +145,15 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
     } catch (error: unknown) {
       console.error("Error fetching IAM policy:", error);
       setError(`Failed to fetch IAM policy: ${error instanceof Error ? error.message : String(error)}`);
+<<<<<<< HEAD
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to fetch IAM policy",
         message: error instanceof Error ? error.message : String(error),
       });
+=======
+      showFailureToast(error);
+>>>>>>> 21d012a (v0.2.32)
     } finally {
       setDebugInfo(debugText);
       setIsLoading(false);
@@ -207,8 +223,12 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
       // Validate the member ID format based on type
       if (!validateMemberId(values.memberType, values.memberId)) {
         addingToast.hide();
+<<<<<<< HEAD
         showToast({
           style: Toast.Style.Failure,
+=======
+        showFailureToast({
+>>>>>>> 21d012a (v0.2.32)
           title: "Invalid member ID format",
           message: `The format for ${values.memberType} is incorrect. Please check and try again.`,
         });
@@ -238,6 +258,7 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
       addingToast.hide();
 
       // Provide more specific error messages
+<<<<<<< HEAD
       let errorMessage = error instanceof Error ? error.message : String(error);
       let errorTitle = "Failed to add member";
 
@@ -256,6 +277,26 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
         title: errorTitle,
         message: errorMessage,
       });
+=======
+      if (error instanceof Error) {
+        const message = error.message;
+        if (message.includes("does not exist")) {
+          showFailureToast({
+            title: "User not found",
+            message: `The user ${values.memberId} does not exist. Please check the email address and try again.`,
+          });
+        } else if (message.includes("Permission denied") || message.includes("403")) {
+          showFailureToast({
+            title: "Permission denied",
+            message: "You don't have permission to modify IAM policies for this resource.",
+          });
+        } else {
+          showFailureToast(error);
+        }
+      } else {
+        showFailureToast("Failed to add member");
+      }
+>>>>>>> 21d012a (v0.2.32)
     }
   }
 
@@ -326,11 +367,15 @@ export default function IAMMembersView({ projectId, gcloudPath, resourceName, re
         fetchIAMPolicy();
       } catch (error: unknown) {
         removingToast.hide();
+<<<<<<< HEAD
         showToast({
           style: Toast.Style.Failure,
           title: "Failed to remove member",
           message: error instanceof Error ? error.message : String(error),
         });
+=======
+        showFailureToast(error);
+>>>>>>> 21d012a (v0.2.32)
       }
     }
   }

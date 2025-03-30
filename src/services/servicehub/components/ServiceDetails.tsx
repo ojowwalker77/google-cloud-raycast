@@ -1,11 +1,19 @@
 import { useState, useEffect } from "react";
 import { Detail, ActionPanel, Action, Icon, Toast, showToast, Color } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+<<<<<<< HEAD
 import { MarketplaceService, GCPService } from "../ServiceHubService";
 
 interface ServiceDetailsProps {
   service: GCPService;
   serviceHub: MarketplaceService;
+=======
+import { ServiceHubService, GCPService } from "../ServiceHubService";
+
+interface ServiceDetailsProps {
+  service: GCPService;
+  serviceHub: ServiceHubService;
+>>>>>>> 21d012a (v0.2.32)
   onServiceStatusChange: (updatedService?: GCPService) => void;
 }
 
@@ -72,6 +80,12 @@ export default function ServiceDetails({ service, serviceHub, onServiceStatusCha
 
         await serviceHub.disableService(serviceDetails.name);
 
+<<<<<<< HEAD
+=======
+        // Add delay to allow backend changes to propagate
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+>>>>>>> 21d012a (v0.2.32)
         // Verify the service was actually disabled
         const isStillEnabled = await serviceHub.isServiceEnabled(serviceDetails.name);
 
@@ -106,6 +120,12 @@ export default function ServiceDetails({ service, serviceHub, onServiceStatusCha
 
         await serviceHub.enableService(serviceDetails.name);
 
+<<<<<<< HEAD
+=======
+        // Add delay to allow backend changes to propagate
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+>>>>>>> 21d012a (v0.2.32)
         // Verify the service was actually enabled
         const isNowEnabled = await serviceHub.isServiceEnabled(serviceDetails.name);
 
@@ -143,6 +163,12 @@ export default function ServiceDetails({ service, serviceHub, onServiceStatusCha
       setIsToggling(false);
       setIsLoading(false);
 
+<<<<<<< HEAD
+=======
+      // Add delay before final refresh to ensure we get the latest state
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+>>>>>>> 21d012a (v0.2.32)
       // Refresh the service details to ensure we have the latest data
       fetchServiceDetails();
     }

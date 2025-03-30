@@ -33,20 +33,34 @@ export function CodeEditor({
     }
   }, [code, isEditing]);
 
+<<<<<<< HEAD
   const handleSave = () => {
     if (onSave) {
       onSave(editedCode);
+=======
+  const handleSave = async () => {
+    if (onSave) {
+      await onSave(editedCode);
+>>>>>>> 21d012a (v0.2.32)
     } else {
       onChange(editedCode);
     }
     setIsEditing(false);
   };
 
+<<<<<<< HEAD
   const handleCancel = () => {
     setEditedCode(code);
     setIsEditing(false);
     if (onCancel) {
       onCancel();
+=======
+  const handleCancel = async () => {
+    setEditedCode(code);
+    setIsEditing(false);
+    if (onCancel) {
+      await onCancel();
+>>>>>>> 21d012a (v0.2.32)
     }
   };
 
@@ -61,7 +75,11 @@ export function CodeEditor({
               title="Save"
               icon={Icon.Check}
               shortcut={{ modifiers: ["cmd"], key: "s" }}
+<<<<<<< HEAD
               onSubmit={() => handleSave()}
+=======
+              onSubmit={handleSave}
+>>>>>>> 21d012a (v0.2.32)
             />
             <Action
               title="Cancel"
@@ -103,8 +121,13 @@ export function CodeEditor({
               title="Save"
               icon={Icon.Check}
               shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+<<<<<<< HEAD
               onAction={() => {
                 if (onSave) onSave(editedCode);
+=======
+              onAction={async () => {
+                if (onSave) await onSave(editedCode);
+>>>>>>> 21d012a (v0.2.32)
                 pop();
               }}
             />
@@ -114,8 +137,13 @@ export function CodeEditor({
               title="Cancel"
               icon={Icon.XmarkCircle}
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+<<<<<<< HEAD
               onAction={() => {
                 if (onCancel) onCancel();
+=======
+              onAction={async () => {
+                if (onCancel) await onCancel();
+>>>>>>> 21d012a (v0.2.32)
                 setEditedCode(code); // Reset to original code on cancel
                 pop();
               }}

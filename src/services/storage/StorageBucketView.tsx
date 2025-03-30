@@ -21,6 +21,11 @@ import IAMMembersView from "./IAMMembersView";
 import { IAMMembersByPrincipalView } from "../iam";
 import StorageStatsView from "./StorageStatsView";
 import { showFailureToast } from "@raycast/utils";
+<<<<<<< HEAD
+=======
+import { CacheManager, Project } from "../../utils/CacheManager";
+import ProjectQuickSwitcher from "../../common/ProjectQuickSwitcher";
+>>>>>>> 21d012a (v0.2.32)
 
 const execPromise = promisify(exec);
 
@@ -42,11 +47,48 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
   const [buckets, setBuckets] = useState<Bucket[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [debugInfo, setDebugInfo] = useState<string>("");
+<<<<<<< HEAD
   const { push, pop } = useNavigation();
 
   useEffect(() => {
     fetchBuckets();
   }, []);
+=======
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [selectedProjectId, setSelectedProjectId] = useState<string>(projectId);
+  const { push, pop } = useNavigation();
+
+  useEffect(() => {
+    loadProjects();
+    fetchBuckets();
+  }, [selectedProjectId]);
+
+  async function loadProjects() {
+    try {
+      const cachedProjects = CacheManager.getProjectsList();
+      if (cachedProjects) {
+        setProjects(cachedProjects.projects);
+      } else {
+        const { stdout } = await execPromise(`${gcloudPath} projects list --format=json`);
+        const projectsData = JSON.parse(stdout);
+        const formattedProjects = projectsData.map((project: any) => ({
+          id: project.projectId,
+          name: project.name,
+          projectNumber: project.projectNumber,
+          createTime: project.createTime || new Date().toISOString(),
+        }));
+        setProjects(formattedProjects);
+        CacheManager.saveProjectsList(formattedProjects);
+      }
+    } catch (error) {
+      console.error("Error loading projects:", error);
+      showFailureToast("Failed to load projects", {
+        title: "Failed to load projects",
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+>>>>>>> 21d012a (v0.2.32)
 
   // Function to generate a unique bucket name with a random suffix
   function generateUniqueBucketName(purpose: string = "storage"): string {
@@ -61,7 +103,11 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
     showToast({
       style: Toast.Style.Animated,
       title: "Loading buckets...",
+<<<<<<< HEAD
       message: `Project: ${projectId}`,
+=======
+      message: `Project: ${selectedProjectId}`,
+>>>>>>> 21d012a (v0.2.32)
     });
 
     try {
@@ -86,7 +132,11 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
 
       try {
         // Use the buckets list command instead of storage ls
+<<<<<<< HEAD
         const command = `${gcloudPath} storage buckets list --project=${projectId} --format=json`;
+=======
+        const command = `${gcloudPath} storage buckets list --project=${selectedProjectId} --format=json`;
+>>>>>>> 21d012a (v0.2.32)
 
         // console.log(`Executing bucket list command: ${command}`);
         debugText += `Executing command: ${command}\n`;
@@ -157,7 +207,11 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
   async function createBucket(values: { name: string; location: string; storageClass: string }) {
     try {
       // Build the command with all options
+<<<<<<< HEAD
       const command = `${gcloudPath} storage buckets create gs://${values.name} --project=${projectId} --location=${values.location} --default-storage-class=${values.storageClass}`;
+=======
+      const command = `${gcloudPath} storage buckets create gs://${values.name} --project=${selectedProjectId} --location=${values.location} --default-storage-class=${values.storageClass}`;
+>>>>>>> 21d012a (v0.2.32)
 
       // console.log(`Creating bucket with command: ${command}`);
 
@@ -202,7 +256,11 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
       });
 
       try {
+<<<<<<< HEAD
         const command = `${gcloudPath} storage buckets delete gs://${bucketName} --project=${projectId} --quiet`;
+=======
+        const command = `${gcloudPath} storage buckets delete gs://${bucketName} --project=${selectedProjectId} --quiet`;
+>>>>>>> 21d012a (v0.2.32)
 
         // console.log(`Deleting bucket with command: ${command}`);
 
@@ -235,7 +293,11 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
   }
 
   function viewBucketObjects(bucketName: string) {
+<<<<<<< HEAD
     push(<StorageObjectsView projectId={projectId} gcloudPath={gcloudPath} bucketName={bucketName} />);
+=======
+    push(<StorageObjectsView projectId={selectedProjectId} gcloudPath={gcloudPath} bucketName={bucketName} />);
+>>>>>>> 21d012a (v0.2.32)
   }
 
   function showDebugInfo() {
@@ -258,6 +320,7 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
   }
 
   function viewBucketIAM(bucketName: string) {
+<<<<<<< HEAD
     push(<BucketIAMView projectId={projectId} gcloudPath={gcloudPath} bucketName={bucketName} />);
   }
 
@@ -275,6 +338,25 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
 
   function viewBucketStats(bucketName: string) {
     push(<StorageStatsView projectId={projectId} gcloudPath={gcloudPath} bucketName={bucketName} />);
+=======
+    push(<BucketIAMView projectId={selectedProjectId} gcloudPath={gcloudPath} bucketName={bucketName} />);
+  }
+
+  function viewIAMMembers() {
+    push(<IAMMembersView projectId={selectedProjectId} gcloudPath={gcloudPath} />);
+  }
+
+  function viewIAMMembersByPrincipal() {
+    push(<IAMMembersByPrincipalView projectId={selectedProjectId} gcloudPath={gcloudPath} />);
+  }
+
+  function viewBucketLifecycle(bucketName: string) {
+    push(<BucketLifecycleView projectId={selectedProjectId} gcloudPath={gcloudPath} bucketName={bucketName} />);
+  }
+
+  function viewBucketStats(bucketName: string) {
+    push(<StorageStatsView projectId={selectedProjectId} gcloudPath={gcloudPath} bucketName={bucketName} />);
+>>>>>>> 21d012a (v0.2.32)
   }
 
   function formatDate(dateString: string) {
@@ -285,6 +367,14 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
   function showCreateBucketForm() {
     const suggestedName = generateUniqueBucketName();
 
+<<<<<<< HEAD
+=======
+    // Validation function for bucket name
+    const validateBucketName = (value: string) => {
+      return value.length > 0 ? "" : "Bucket name is required";
+    };
+
+>>>>>>> 21d012a (v0.2.32)
     push(
       <Form
         navigationTitle="Create Storage Bucket"
@@ -319,8 +409,13 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
           info="Must be globally unique across all of Google Cloud"
           defaultValue={suggestedName}
           autoFocus={true}
+<<<<<<< HEAD
           error={suggestedName ? "" : "Bucket name is required"}
           onChange={(value) => (value.length > 0 ? null : "Bucket name is required")}
+=======
+          error={validateBucketName(suggestedName)}
+          onChange={validateBucketName}
+>>>>>>> 21d012a (v0.2.32)
         />
 
         <Form.Dropdown
@@ -380,6 +475,13 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
       isLoading={isLoading}
       searchBarPlaceholder="Search buckets..."
       navigationTitle="Browse Buckets"
+<<<<<<< HEAD
+=======
+      isShowingDetail
+      searchBarAccessory={
+        <ProjectQuickSwitcher projectId={projectId} gcloudPath={gcloudPath} onProjectChange={setSelectedProjectId} />
+      }
+>>>>>>> 21d012a (v0.2.32)
       actions={
         <ActionPanel>
           <Action title="Create Bucket" icon={Icon.Plus} onAction={showCreateBucketForm} />
@@ -405,9 +507,29 @@ export default function StorageBucketView({ projectId, gcloudPath }: StorageBuck
           <List.Item
             key={bucket.id}
             title={bucket.name}
+<<<<<<< HEAD
             subtitle={bucket.location}
             icon={getStorageClassIcon(bucket.storageClass)}
             accessories={[{ text: bucket.storageClass }, { text: formatDate(bucket.created), tooltip: "Created on" }]}
+=======
+            icon={getStorageClassIcon(bucket.storageClass)}
+            detail={
+              <List.Item.Detail
+                markdown={`# ${bucket.name}\n\n**Location:** ${bucket.location}\n\n**Storage Class:** ${bucket.storageClass}\n\n**Created:** ${formatDate(bucket.created)}`}
+                metadata={
+                  <List.Item.Detail.Metadata>
+                    <List.Item.Detail.Metadata.Label title="Name" text={bucket.name} />
+                    <List.Item.Detail.Metadata.Separator />
+                    <List.Item.Detail.Metadata.Label title="Location" text={bucket.location} />
+                    <List.Item.Detail.Metadata.Label title="Storage Class" text={bucket.storageClass} />
+                    <List.Item.Detail.Metadata.Label title="Created" text={formatDate(bucket.created)} />
+                    <List.Item.Detail.Metadata.Separator />
+                    <List.Item.Detail.Metadata.Label title="Full Path" text={`gs://${bucket.name}`} />
+                  </List.Item.Detail.Metadata>
+                }
+              />
+            }
+>>>>>>> 21d012a (v0.2.32)
             actions={
               <ActionPanel>
                 <ActionPanel.Section title="Bucket Actions">

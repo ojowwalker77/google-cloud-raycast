@@ -7,6 +7,10 @@ import { ComputeInstancesView, ComputeDisksView } from "./services/compute";
 import { NetworkView, VPCView, IPAddressView, FirewallRulesView } from "./services/network";
 import { executeGcloudCommand, getProjects } from "./gcloud";
 import { CacheManager, Project } from "./utils/CacheManager";
+<<<<<<< HEAD
+=======
+import { showFailureToast } from "@raycast/utils";
+>>>>>>> 21d012a (v0.2.32)
 
 // Create a cache instance for project details
 const cache = new Cache({ namespace: "project-details" });
@@ -107,8 +111,12 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
           message: `${result.length} projects found`,
         });
       } else {
+<<<<<<< HEAD
         showToast({
           style: Toast.Style.Failure,
+=======
+        await showFailureToast({
+>>>>>>> 21d012a (v0.2.32)
           title: "No projects found",
           message: "You don't have any Google Cloud projects",
         });
@@ -117,8 +125,12 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
       console.error("Error fetching projects:", error);
       setError("Failed to fetch projects");
 
+<<<<<<< HEAD
       showToast({
         style: Toast.Style.Failure,
+=======
+      await showFailureToast({
+>>>>>>> 21d012a (v0.2.32)
         title: "Failed to fetch projects",
         message: error instanceof Error ? error.message : String(error),
       });
@@ -131,8 +143,12 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
   const selectProject = async (selectedProjectId: string) => {
     if (!selectedProjectId || typeof selectedProjectId !== "string") {
       console.error("Invalid project ID provided to selectProject:", selectedProjectId);
+<<<<<<< HEAD
       showToast({
         style: Toast.Style.Failure,
+=======
+      await showFailureToast({
+>>>>>>> 21d012a (v0.2.32)
         title: "Invalid project ID",
         message: "Cannot select project with invalid ID",
       });
@@ -163,8 +179,12 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
     } catch (error) {
       console.error("Error selecting project:", error);
 
+<<<<<<< HEAD
       showToast({
         style: Toast.Style.Failure,
+=======
+      await showFailureToast({
+>>>>>>> 21d012a (v0.2.32)
         title: "Failed to select project",
         message: error instanceof Error ? error.message : String(error),
       });
@@ -217,7 +237,11 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
 
       loadingToast.hide();
 
+<<<<<<< HEAD
       if (result && Array.isArray(result) && result.length > 0) {
+=======
+      if (result && Array.isArray(result) && result.length > 0 && result[0] && typeof result[0] === "object") {
+>>>>>>> 21d012a (v0.2.32)
         // Cache the result
         cache.set(`project-${projectId}`, JSON.stringify(result[0]));
         cache.set(`project-${projectId}-timestamp`, Date.now().toString());
@@ -230,13 +254,22 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
           title: "Project details loaded",
           message: projectId,
         });
+<<<<<<< HEAD
+=======
+      } else {
+        throw new Error("Invalid project details received from server");
+>>>>>>> 21d012a (v0.2.32)
       }
     } catch (error) {
       console.error("Error fetching project details:", error);
       setError("Failed to fetch project details");
 
+<<<<<<< HEAD
       showToast({
         style: Toast.Style.Failure,
+=======
+      await showFailureToast({
+>>>>>>> 21d012a (v0.2.32)
         title: "Failed to fetch project details",
         message: error instanceof Error ? error.message : String(error),
       });
@@ -279,8 +312,12 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
     } catch (error) {
       // Handle navigation error
       console.error("Navigation error:", error);
+<<<<<<< HEAD
       showToast({
         style: Toast.Style.Failure,
+=======
+      await showFailureToast({
+>>>>>>> 21d012a (v0.2.32)
         title: "Failed to navigate",
         message: error instanceof Error ? error.message : String(error),
       });
@@ -362,8 +399,12 @@ export default function ProjectView({ projectId, gcloudPath }: ProjectViewProps)
         fetchProjects();
       }
     } catch (error) {
+<<<<<<< HEAD
       showToast({
         style: Toast.Style.Failure,
+=======
+      await showFailureToast({
+>>>>>>> 21d012a (v0.2.32)
         title: "Failed to clear cache",
         message: error instanceof Error ? error.message : String(error),
       });

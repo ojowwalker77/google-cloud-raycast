@@ -1,4 +1,8 @@
 import { Cache } from "@raycast/api";
+<<<<<<< HEAD
+=======
+import { showFailureToast } from "@raycast/utils";
+>>>>>>> 21d012a (v0.2.32)
 import fs from "fs";
 import { homedir } from "os";
 import { join } from "path";
@@ -12,11 +16,15 @@ export const CACHE_KEYS = {
   PROJECT_TIMESTAMP: "project-timestamp",
   PROJECTS_LIST: "projects-list",
   PROJECTS_LIST_TIMESTAMP: "projects-list-timestamp",
+<<<<<<< HEAD
   RECENTLY_USED_PROJECTS: "recently-used-projects",
+=======
+>>>>>>> 21d012a (v0.2.32)
 };
 
 // Cache expiration times (in milliseconds)
 export const CACHE_TTL = {
+<<<<<<< HEAD
   AUTH: 72 * 60 * 60 * 1000, // 72 hours (increased from 24 hours)
   PROJECT: 72 * 60 * 60 * 1000, // Same as AUTH - 72 hours
   PROJECTS_LIST: 6 * 60 * 60 * 1000, // 6 hours (increased from 1 hour)
@@ -29,6 +37,39 @@ const PREFS_FILE_PATH = join(homedir(), ".raycast-gcloud-prefs.json");
 const cache = new Cache({ namespace: "gcloud-cache" });
 // Create a settings cache instance
 const settingsCache = new Cache({ namespace: "settings" });
+=======
+  AUTH: 72 * 60 * 60 * 1000, // 72 hours
+  PROJECT: 72 * 60 * 60 * 1000, // 72 hours
+  PROJECTS_LIST: 6 * 60 * 60 * 1000, // 6 hours
+};
+
+// Cache instance
+const cache = new Cache();
+
+// File path for persistent storage
+const PREFS_FILE_PATH = join(homedir(), ".raycast-gcloud-prefs.json");
+
+// Helper function to check if a timestamp is expired
+export function isExpired(timestamp: number, ttl: number): boolean {
+  return Date.now() - timestamp > ttl;
+}
+
+// Helper function to get JSON from cache
+function getJSON<T>(key: string): T | null {
+  const value = cache.get(key);
+  if (!value) return null;
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return null;
+  }
+}
+
+// Helper function to set JSON in cache
+function setJSON<T>(key: string, value: T): void {
+  cache.set(key, JSON.stringify(value));
+}
+>>>>>>> 21d012a (v0.2.32)
 
 export interface Project {
   id: string;
@@ -37,12 +78,15 @@ export interface Project {
   createTime?: string;
 }
 
+<<<<<<< HEAD
 export interface CachedAuth {
   isAuthenticated: boolean;
   user: string;
   timestamp: number;
 }
 
+=======
+>>>>>>> 21d012a (v0.2.32)
 export interface CachedProject {
   projectId: string;
   timestamp: number;
@@ -53,6 +97,7 @@ export interface CachedProjectsList {
   timestamp: number;
 }
 
+<<<<<<< HEAD
 /**
  * Cache manager for Google Cloud authentication and project selection
  */
@@ -182,10 +227,110 @@ export class CacheManager {
 
       // Check if cache is expired
       if (Date.now() - timestamp <= CACHE_TTL.PROJECT) {
+=======
+export interface AuthStatus {
+  isAuthenticated: boolean;
+  timestamp: number;
+  user: string;
+}
+
+export class CacheManager {
+  /** Save authentication status to cache */
+  static saveAuthStatus(isAuthenticated: boolean, user: string): void {
+    cache.set(CACHE_KEYS.AUTH_STATUS, isAuthenticated.toString());
+    cache.set(CACHE_KEYS.AUTH_TIMESTAMP, Date.now().toString());
+    cache.set(CACHE_KEYS.AUTH_USER, user);
+  }
+
+  /** Get cached authentication status */
+  static getAuthStatus(): AuthStatus | null {
+    const status = cache.get(CACHE_KEYS.AUTH_STATUS);
+    const timestampStr = cache.get(CACHE_KEYS.AUTH_TIMESTAMP);
+    const user = cache.get(CACHE_KEYS.AUTH_USER) || "";
+    
+    if (status && timestampStr) {
+      const timestamp = parseInt(timestampStr, 10);
+      if (!isExpired(timestamp, CACHE_TTL.AUTH)) {
+        return {
+          isAuthenticated: status === "true",
+          timestamp,
+          user,
+        };
+      }
+    }
+    return null;
+  }
+
+  /** Clear authentication cache */
+  static clearAuthCache(): void {
+    cache.remove(CACHE_KEYS.AUTH_STATUS);
+    cache.remove(CACHE_KEYS.AUTH_TIMESTAMP);
+    cache.remove(CACHE_KEYS.AUTH_USER);
+  }
+
+  /** Get cache duration limit in hours */
+  static getCacheLimit(): number {
+    return CACHE_TTL.AUTH / (60 * 60 * 1000); // Convert milliseconds to hours
+  }
+
+  /** Update authentication cache duration */
+  static updateAuthCacheDuration(hours: number): void {
+    CACHE_TTL.AUTH = hours * 60 * 60 * 1000;
+  }
+
+  /** Get recently used projects */
+  static getRecentlyUsedProjects(): string[] {
+    const projects = getJSON<string[]>(CACHE_KEYS.PROJECTS_LIST);
+    return projects || [];
+  }
+
+  /** Save recently used projects */
+  static saveRecentlyUsedProjects(projects: string[]): void {
+    setJSON(CACHE_KEYS.PROJECTS_LIST, projects);
+  }
+
+  /** Get recently used projects with details */
+  static async getRecentlyUsedProjectsWithDetails(gcloudPath: string): Promise<Project[]> {
+    const projectIds = CacheManager.getRecentlyUsedProjects();
+    const projectPromises = projectIds.map(id => CacheManager.getProjectDetails(id, gcloudPath));
+    const projects = await Promise.all(projectPromises);
+    return projects.filter((p): p is Project => p !== null);
+  }
+
+  /** Save selected project to cache */
+  static saveSelectedProject(projectId: string): void {
+    if (typeof projectId !== "string" || projectId.trim() === "") {
+      console.error("Invalid project ID provided:", projectId);
+      return;
+    }
+    const now = Date.now();
+    cache.set(CACHE_KEYS.SELECTED_PROJECT, projectId);
+    cache.set(CACHE_KEYS.PROJECT_TIMESTAMP, now.toString());
+
+    // Save to file for fallback persistence
+    try {
+      fs.writeFileSync(PREFS_FILE_PATH, JSON.stringify({ projectId, timestamp: now }));
+    } catch (error) {
+      console.error("Failed to save project to preferences file:", error);
+      showFailureToast("Failed to save project preferences", {
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  }
+
+  /** Get cached selected project */
+  static getSelectedProject(): CachedProject | null {
+    const projectId = cache.get(CACHE_KEYS.SELECTED_PROJECT);
+    const timestampStr = cache.get(CACHE_KEYS.PROJECT_TIMESTAMP);
+    if (projectId && timestampStr) {
+      const timestamp = parseInt(timestampStr, 10);
+      if (!isExpired(timestamp, CACHE_TTL.PROJECT)) {
+>>>>>>> 21d012a (v0.2.32)
         return { projectId, timestamp };
       }
     }
 
+<<<<<<< HEAD
     // If not in cache or expired, try to get from preferences file
     try {
       if (fs.existsSync(PREFS_FILE_PATH)) {
@@ -204,10 +349,22 @@ export class CacheManager {
 
             return { projectId: prefsData.projectId, timestamp: prefsData.timestamp };
           }
+=======
+    // Fallback: try to load from preferences file
+    try {
+      if (fs.existsSync(PREFS_FILE_PATH)) {
+        const prefsData = JSON.parse(fs.readFileSync(PREFS_FILE_PATH, "utf8"));
+        if (prefsData.projectId && prefsData.timestamp && !isExpired(prefsData.timestamp, CACHE_TTL.PROJECT)) {
+          // Restore to cache
+          cache.set(CACHE_KEYS.SELECTED_PROJECT, prefsData.projectId);
+          cache.set(CACHE_KEYS.PROJECT_TIMESTAMP, prefsData.timestamp.toString());
+          return { projectId: prefsData.projectId, timestamp: prefsData.timestamp };
+>>>>>>> 21d012a (v0.2.32)
         }
       }
     } catch (error) {
       console.error("Failed to load project from preferences file:", error);
+<<<<<<< HEAD
     }
 
     return null;
@@ -293,6 +450,42 @@ export class CacheManager {
 
     try {
       const projects = JSON.parse(projectsListStr);
+=======
+      showFailureToast("Failed to load project preferences", {
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+    return null;
+  }
+
+  /** Clear selected project cache */
+  static clearProjectCache(): void {
+    cache.remove(CACHE_KEYS.SELECTED_PROJECT);
+    cache.remove(CACHE_KEYS.PROJECT_TIMESTAMP);
+  }
+
+  /** Save projects list to cache */
+  static saveProjectsList(projects: Project[]): void {
+    if (!Array.isArray(projects)) {
+      console.error("Invalid projects array provided:", projects);
+      return;
+    }
+    // Only save valid projects (with an id)
+    const validProjects = projects.filter((project) => project && project.id);
+    setJSON(CACHE_KEYS.PROJECTS_LIST, validProjects);
+    cache.set(CACHE_KEYS.PROJECTS_LIST_TIMESTAMP, Date.now().toString());
+  }
+
+  /** Get cached projects list */
+  static getProjectsList(): CachedProjectsList | null {
+    const projectsListStr = cache.get(CACHE_KEYS.PROJECTS_LIST);
+    const timestampStr = cache.get(CACHE_KEYS.PROJECTS_LIST_TIMESTAMP);
+    if (!projectsListStr || !timestampStr) return null;
+    const timestamp = parseInt(timestampStr, 10);
+    if (isExpired(timestamp, CACHE_TTL.PROJECTS_LIST)) return null;
+    try {
+      const projects = JSON.parse(projectsListStr) as Project[];
+>>>>>>> 21d012a (v0.2.32)
       return { projects, timestamp };
     } catch (error) {
       console.error("Failed to parse cached projects list:", error);
@@ -300,14 +493,19 @@ export class CacheManager {
     }
   }
 
+<<<<<<< HEAD
   /**
    * Clear projects list cache
    */
+=======
+  /** Clear projects list cache */
+>>>>>>> 21d012a (v0.2.32)
   static clearProjectsListCache(): void {
     cache.remove(CACHE_KEYS.PROJECTS_LIST);
     cache.remove(CACHE_KEYS.PROJECTS_LIST_TIMESTAMP);
   }
 
+<<<<<<< HEAD
   /**
    * Clear all caches
    */
@@ -330,10 +528,29 @@ export class CacheManager {
   static async getProjectDetails(projectId: string, gcloudPath: string): Promise<Project | null> {
     if (!projectId || typeof projectId !== "string" || !gcloudPath) {
       console.error("Invalid parameters in getProjectDetails:", { projectId, gcloudPath });
+=======
+  /** Clear all caches */
+  static clearAllCaches(): void {
+    Object.values(CACHE_KEYS).forEach((key) => cache.remove(key));
+    try {
+      if (fs.existsSync(PREFS_FILE_PATH)) {
+        fs.unlinkSync(PREFS_FILE_PATH);
+      }
+    } catch (error) {
+      console.error("Failed to remove preferences file:", error);
+    }
+  }
+
+  /** Get project details from gcloud command */
+  static async getProjectDetails(projectId: string, gcloudPath: string): Promise<Project | null> {
+    if (!projectId || !gcloudPath) {
+      console.error("Invalid parameters:", { projectId, gcloudPath });
+>>>>>>> 21d012a (v0.2.32)
       return null;
     }
 
     try {
+<<<<<<< HEAD
       // Check local cache first (ProjectView has its own cache)
       const projectCache = new Cache({ namespace: "project-details" });
       const cachedDetailsStr = projectCache.get(`project-${projectId}`);
@@ -443,6 +660,24 @@ export class CacheManager {
     if (recentlyUsedIds.length > cacheLimit) {
       const trimmedList = recentlyUsedIds.slice(0, cacheLimit);
       CacheManager.saveRecentlyUsedProjects(trimmedList);
+=======
+      const { execSync } = require("child_process");
+      const output = execSync(`${gcloudPath} projects describe ${projectId} --format=json`, { encoding: "utf8" });
+
+      const projectData = JSON.parse(output);
+      return {
+        id: projectData.projectId,
+        name: projectData.name,
+        projectNumber: projectData.projectNumber,
+        createTime: projectData.createTime,
+      };
+    } catch (error) {
+      console.error(`Failed to get project details for ${projectId}:`, error);
+      showFailureToast(`Failed to get project details for ${projectId}`, {
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+      return null;
+>>>>>>> 21d012a (v0.2.32)
     }
   }
 }
