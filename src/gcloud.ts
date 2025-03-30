@@ -15,6 +15,14 @@ interface CommandCacheEntry<T> {
   timestamp: number;
 }
 
+<<<<<<< HEAD
+=======
+interface TimeoutPromise {
+  promise: Promise<never>;
+  timeoutId: NodeJS.Timeout;
+}
+
+>>>>>>> 21d012a (v0.2.32)
 // Global cache for command results to reduce API calls
 const commandCache = new Map<string, CommandCacheEntry<unknown>>();
 const COMMAND_CACHE_TTL = 600000; // 10 minutes cache TTL
@@ -60,6 +68,7 @@ export async function executeGcloudCommand(
   try {
     const { skipCache = false, cacheTTL = COMMAND_CACHE_TTL, maxRetries = 1, timeout = 25000 } = options;
 
+<<<<<<< HEAD
     // Only add project flag if projectId is provided and not empty
     const projectFlag =
       projectId && typeof projectId === "string" && projectId.trim() !== "" ? ` --project=${projectId}` : "";
@@ -69,22 +78,36 @@ export async function executeGcloudCommand(
     const cacheKey = fullCommand;
 
     // Check for pending requests for the same command to avoid duplicate API calls
+=======
+    const projectFlag =
+      projectId && typeof projectId === "string" && projectId.trim() !== "" ? ` --project=${projectId}` : "";
+    const fullCommand = `${gcloudPath} ${command}${projectFlag} --format=json`;
+    const cacheKey = fullCommand;
+
+>>>>>>> 21d012a (v0.2.32)
     const pendingRequest = pendingRequests.get(cacheKey);
     if (pendingRequest) {
       return pendingRequest;
     }
 
+<<<<<<< HEAD
     // Check cache unless explicitly told to skip it
+=======
+>>>>>>> 21d012a (v0.2.32)
     if (!skipCache) {
       const cachedResult = commandCache.get(cacheKey);
       const now = Date.now();
 
       if (cachedResult && now - cachedResult.timestamp < cacheTTL) {
+<<<<<<< HEAD
         // console.log(`Using cached result for: ${fullCommand}`);
+=======
+>>>>>>> 21d012a (v0.2.32)
         return cachedResult.result;
       }
     }
 
+<<<<<<< HEAD
     // Create a promise for this request with timeout
     const requestPromise = Promise.race([
       executeCommand(fullCommand, cacheKey, maxRetries),
@@ -100,6 +123,29 @@ export async function executeGcloudCommand(
       return await requestPromise;
     } finally {
       // Clean up the pending request
+=======
+    // Create timeout promise properly
+    const createTimeoutPromise = (): TimeoutPromise => {
+      let timeoutId: NodeJS.Timeout;
+      const promise = new Promise<never>((_, reject) => {
+        timeoutId = setTimeout(() => {
+          reject(new Error(`Command timed out after ${timeout}ms: ${fullCommand}`));
+        }, timeout);
+      });
+      return { promise, timeoutId: timeoutId! };
+    };
+
+    const timeoutPromise = createTimeoutPromise();
+    const requestPromise = Promise.race([executeCommand(fullCommand, cacheKey, maxRetries), timeoutPromise.promise]);
+
+    pendingRequests.set(cacheKey, requestPromise);
+
+    try {
+      const result = await requestPromise;
+      clearTimeout(timeoutPromise.timeoutId);
+      return result;
+    } finally {
+>>>>>>> 21d012a (v0.2.32)
       pendingRequests.delete(cacheKey);
     }
   } catch (error: unknown) {
@@ -125,15 +171,24 @@ async function executeCommand(
   currentRetry: number = 0,
 ): Promise<unknown> {
   try {
+<<<<<<< HEAD
     // console.log(`Executing command: ${fullCommand}`);
 
     // Increase maxBuffer to handle large outputs (10MB)
     const { stdout, stderr } = await execPromise(fullCommand, { maxBuffer: 10 * 1024 * 1024 });
+=======
+    const { stdout, stderr } = await execPromise(fullCommand, {
+      maxBuffer: 10 * 1024 * 1024,
+    });
+>>>>>>> 21d012a (v0.2.32)
 
     if (stderr && stderr.trim() !== "") {
       console.warn(`Command produced stderr: ${stderr}`);
 
+<<<<<<< HEAD
       // Check for auth errors in stderr
+=======
+>>>>>>> 21d012a (v0.2.32)
       if (
         stderr.includes("not authorized") ||
         stderr.includes("not authenticated") ||
@@ -147,7 +202,10 @@ async function executeCommand(
         throw new Error("Authentication error: Please re-authenticate with Google Cloud");
       }
 
+<<<<<<< HEAD
       // Check for project errors
+=======
+>>>>>>> 21d012a (v0.2.32)
       if (
         stderr.includes("project not found") ||
         stderr.includes("project ID not specified") ||
@@ -162,15 +220,19 @@ async function executeCommand(
     }
 
     if (!stdout || stdout.trim() === "") {
+<<<<<<< HEAD
       // console.log("Command returned empty output, treating as empty array result");
 
       // Store empty array in cache
+=======
+>>>>>>> 21d012a (v0.2.32)
       commandCache.set(cacheKey, { result: [], timestamp: Date.now() });
       return [];
     }
 
     try {
       const result = JSON.parse(stdout);
+<<<<<<< HEAD
       const parsedResult = Array.isArray(result) ? result : [result];
 
       // Store in cache
@@ -180,6 +242,25 @@ async function executeCommand(
     } catch (error) {
       console.error(`Error parsing JSON: ${error}`);
       console.error(`Raw output: ${stdout.substring(0, 200)}...`); // Show first 200 chars
+=======
+
+      const expectsArray =
+        fullCommand.includes("list") || (fullCommand.endsWith("--format=json") && fullCommand.includes("list"));
+
+      if (expectsArray && !Array.isArray(result)) {
+        console.log("Command expected to return array but got object, wrapping in array:", fullCommand);
+        const parsedResult = [result];
+        commandCache.set(cacheKey, { result: parsedResult, timestamp: Date.now() });
+        return parsedResult;
+      }
+
+      const parsedResult = Array.isArray(result) ? result : [result];
+      commandCache.set(cacheKey, { result: parsedResult, timestamp: Date.now() });
+      return parsedResult;
+    } catch (error) {
+      console.error(`Error parsing JSON: ${error}`);
+      console.error(`Raw output: ${stdout.substring(0, 200)}...`);
+>>>>>>> 21d012a (v0.2.32)
       showFailureToast({
         title: "Parse Error",
         message: `Failed to parse command output as JSON: ${error instanceof Error ? error.message : String(error)}`,
@@ -187,10 +268,14 @@ async function executeCommand(
       throw new Error(`Failed to parse command output as JSON: ${error}`);
     }
   } catch (error: unknown) {
+<<<<<<< HEAD
     // Retry on error if we haven't exceeded max retries
     if (currentRetry < maxRetries) {
       // console.log(`Retrying command (attempt ${currentRetry + 1}/${maxRetries}): ${fullCommand}`);
       // Exponential backoff: wait longer between retries
+=======
+    if (currentRetry < maxRetries) {
+>>>>>>> 21d012a (v0.2.32)
       const backoffMs = 1000 * Math.pow(2, currentRetry);
       await new Promise((resolve) => setTimeout(resolve, backoffMs));
       return executeCommand(fullCommand, cacheKey, maxRetries, currentRetry + 1);
@@ -227,7 +312,10 @@ export function clearCommandCache(pattern?: RegExp) {
  */
 export async function isAuthenticated(gcloudPath: string): Promise<boolean> {
   try {
+<<<<<<< HEAD
     // Use a more direct command to check authentication
+=======
+>>>>>>> 21d012a (v0.2.32)
     const { stdout } = await execPromise(`${gcloudPath} auth list --format="value(account)" --filter="status=ACTIVE"`);
     return stdout.trim() !== "";
   } catch (error) {
@@ -236,6 +324,28 @@ export async function isAuthenticated(gcloudPath: string): Promise<boolean> {
   }
 }
 
+<<<<<<< HEAD
+=======
+/**
+ * Initiates browser-based authentication with gcloud
+ * @param gcloudPath Path to the gcloud executable
+ * @returns Promise that resolves when authentication is complete
+ */
+export async function authenticateWithBrowser(gcloudPath: string): Promise<void> {
+  console.log("Starting browser authentication process");
+  console.log("Using gcloud path:", gcloudPath);
+
+  try {
+    // Simple direct auth login - will automatically open browser
+    await execPromise(`${gcloudPath} auth login`);
+    console.log("Authentication completed successfully");
+  } catch (error) {
+    console.error("Error during authentication:", error);
+    throw error;
+  }
+}
+
+>>>>>>> 21d012a (v0.2.32)
 interface RawGCloudProject {
   projectId: string;
   name?: string;
@@ -253,11 +363,15 @@ export async function getProjects(gcloudPath: string): Promise<Project[]> {
   }
 
   try {
+<<<<<<< HEAD
     // Check cache first
+=======
+>>>>>>> 21d012a (v0.2.32)
     const cacheKey = `${gcloudPath} projects list --format=json`;
     const cachedResult = commandCache.get(cacheKey);
     const now = Date.now();
 
+<<<<<<< HEAD
     // Use a longer TTL for projects list (30 minutes)
     if (cachedResult && now - cachedResult.timestamp < PROJECTS_CACHE_TTL) {
       // console.log("Using cached projects list");
@@ -269,6 +383,15 @@ export async function getProjects(gcloudPath: string): Promise<Project[]> {
 
     if (!stdout || stdout.trim() === "") {
       // console.log("No projects found or empty response");
+=======
+    if (cachedResult && now - cachedResult.timestamp < PROJECTS_CACHE_TTL) {
+      return cachedResult.result as Project[];
+    }
+
+    const { stdout } = await execPromise(`${gcloudPath} projects list --format=json`);
+
+    if (!stdout || stdout.trim() === "") {
+>>>>>>> 21d012a (v0.2.32)
       return [];
     }
 
@@ -287,7 +410,10 @@ export async function getProjects(gcloudPath: string): Promise<Project[]> {
 
     const mappedProjects = projects
       .map((project: RawGCloudProject): GCloudProject | null => {
+<<<<<<< HEAD
         // Validate project object to ensure it has required fields
+=======
+>>>>>>> 21d012a (v0.2.32)
         if (!project || !project.projectId) {
           console.warn("Skipping invalid project:", project);
           return null;
@@ -300,9 +426,14 @@ export async function getProjects(gcloudPath: string): Promise<Project[]> {
           createTime: project.createTime,
         };
       })
+<<<<<<< HEAD
       .filter((project): project is GCloudProject => project !== null); // Type guard to remove nulls
 
     // Cache the result
+=======
+      .filter((project): project is GCloudProject => project !== null);
+
+>>>>>>> 21d012a (v0.2.32)
     commandCache.set(cacheKey, { result: mappedProjects, timestamp: now });
 
     return mappedProjects;

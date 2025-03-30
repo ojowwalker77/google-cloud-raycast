@@ -15,6 +15,15 @@ import {
 import { ComputeService, ComputeInstance } from "./ComputeService";
 import ComputeInstanceDetailView from "./ComputeInstanceDetailView";
 import CreateVMForm from "./components/CreateVMForm";
+<<<<<<< HEAD
+=======
+import { CacheManager, Project } from "../../utils/CacheManager";
+import { exec } from "child_process";
+import { promisify } from "util";
+import ProjectQuickSwitcher from "../../common/ProjectQuickSwitcher";
+
+const execPromise = promisify(exec);
+>>>>>>> 21d012a (v0.2.32)
 
 interface ComputeInstancesViewProps {
   projectId: string;
@@ -27,13 +36,22 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
   const [filteredInstances, setFilteredInstances] = useState<ComputeInstance[]>([]);
   const [searchText, setSearchText] = useState<string>("");
   const [selectedZone, setSelectedZone] = useState<string | undefined>(undefined);
+<<<<<<< HEAD
   const [zones, setZones] = useState<string[]>([]);
   const [service, setService] = useState<ComputeService | null>(null);
+=======
+  const [service, setService] = useState<ComputeService | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<string>(projectId);
+>>>>>>> 21d012a (v0.2.32)
   const { push } = useNavigation();
 
   useEffect(() => {
     // Initialize service with provided gcloudPath and projectId
+<<<<<<< HEAD
     const computeService = new ComputeService(gcloudPath, projectId);
+=======
+    const computeService = new ComputeService(gcloudPath, selectedProjectId);
+>>>>>>> 21d012a (v0.2.32)
     setService(computeService);
 
     const initializeData = async () => {
@@ -111,7 +129,11 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
     };
 
     initializeData();
+<<<<<<< HEAD
   }, [gcloudPath, projectId]);
+=======
+  }, [gcloudPath, selectedProjectId]);
+>>>>>>> 21d012a (v0.2.32)
 
   useEffect(() => {
     // Filter instances whenever searchText or instances change
@@ -131,11 +153,17 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
 
   const fetchZones = async (computeService: ComputeService) => {
     try {
+<<<<<<< HEAD
       const zonesList = await computeService.listZones();
       setZones(zonesList);
     } catch (error) {
       console.error("Error fetching zones:", error);
       // Don't show errors for background fetches to avoid overwhelming the user
+=======
+      await computeService.listZones();
+    } catch (error) {
+      console.error("Error fetching zones:", error);
+>>>>>>> 21d012a (v0.2.32)
     }
   };
 
@@ -341,7 +369,11 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
         instance={instance}
         service={service}
         onRefresh={() => fetchInstances(service)}
+<<<<<<< HEAD
         projectId={projectId}
+=======
+        projectId={selectedProjectId}
+>>>>>>> 21d012a (v0.2.32)
       />,
     );
   };
@@ -352,7 +384,11 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
     }
 
     const zone = service.formatZone(instance.zone).split("/").pop() || "";
+<<<<<<< HEAD
     const command = `gcloud compute ssh --zone="${zone}" "${instance.name}" --project="${projectId}"`;
+=======
+    const command = `gcloud compute ssh --zone="${zone}" "${instance.name}" --project="${selectedProjectId}"`;
+>>>>>>> 21d012a (v0.2.32)
 
     Clipboard.copy(command);
     showToast({
@@ -394,7 +430,11 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
       }
     };
 
+<<<<<<< HEAD
     push(<CreateVMForm projectId={projectId} gcloudPath={gcloudPath} onVMCreated={createdCallback} />);
+=======
+    push(<CreateVMForm projectId={selectedProjectId} gcloudPath={gcloudPath} onVMCreated={createdCallback} />);
+>>>>>>> 21d012a (v0.2.32)
   };
 
   const getStatusIcon = (status: string) => {
@@ -417,6 +457,7 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
       filtering={{ keepSectionOrder: true }}
       navigationTitle="Compute Engine Instances"
       searchBarAccessory={
+<<<<<<< HEAD
         <List.Dropdown
           tooltip="Select Zone"
           value={selectedZone || "all"}
@@ -427,12 +468,19 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
             <List.Dropdown.Item key={zone} title={zone} value={zone} />
           ))}
         </List.Dropdown>
+=======
+        <ProjectQuickSwitcher projectId={projectId} gcloudPath={gcloudPath} onProjectChange={setSelectedProjectId} />
+>>>>>>> 21d012a (v0.2.32)
       }
     >
       <List.EmptyView
         title="No VM instances found"
         description={isLoading ? "Loading instances..." : "No VM instances found in the selected zone"}
+<<<<<<< HEAD
         icon={{ source: "https://cloud.google.com/compute/images/logo_compute_black.svg" }}
+=======
+        icon={{ source: Icon.Desktop, tintColor: Color.Blue }}
+>>>>>>> 21d012a (v0.2.32)
         actions={
           <ActionPanel>
             <Action title="Create Vm Instance" icon={Icon.Plus} onAction={createVMInstance} />

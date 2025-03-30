@@ -35,10 +35,19 @@ raycast-env.d.ts
 .swiftpm
 compiled_raycast_swift
 original_*.tsx
+<<<<<<< HEAD
+=======
+
+>>>>>>> 21d012a (v0.2.32)
 DevScreen.tsx
 src/services/compute/README.md
 src/services/iam/README.md
 src/services/network/README.md
 src/services/servicehub/README.md
 src/services/storage/README.md
+<<<<<<< HEAD
 helper_documentation
+=======
+.cursor
+helper_documentation
+>>>>>>> 21d012a (v0.2.32)

@@ -1,4 +1,5 @@
 import { ActionPanel, Action, List, Icon, useNavigation, showToast, Toast, Color, Cache } from "@raycast/api";
+<<<<<<< HEAD
 import { useState, useEffect } from "react";
 import { CacheManager, Project } from "../utils/CacheManager";
 import ProjectView from "../ProjectView";
@@ -106,11 +107,64 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to load cached project",
+=======
+import { useState, useEffect, useCallback } from "react";
+import { CacheManager, Project } from "../utils/CacheManager";
+import { RecentProjectsManager, RecentProject } from "../utils/RecentProjectsManager";
+import ProjectView from "../ProjectView";
+import { ServicesView } from "./ServicesView";
+import { executeGcloudCommand } from "../gcloud";
+import { showFailureToast } from "@raycast/utils";
+import { CachedProjectViewProps, ProjectDetails } from "../common/types";
+import { SettingsView } from "./SettingsView";
+
+// Create cache instances
+const navigationCache = new Cache({ namespace: "navigation-state" });
+
+export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAccount }: CachedProjectViewProps) {
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentProject, setCurrentProject] = useState<Project | null>(null);
+  const [recentProjects, setRecentProjects] = useState<RecentProject[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [shouldNavigate, setShouldNavigate] = useState<{
+    action: string;
+    projectId?: string;
+  } | null>(null);
+  const { pop, push } = useNavigation();
+
+  // Load current project and recent projects
+  useEffect(() => {
+    loadProjectData();
+  }, []);
+
+  const loadProjectData = async () => {
+    try {
+      setIsLoading(true);
+      // Get current project from cache
+      const cachedProject = CacheManager.getSelectedProject();
+      if (cachedProject) {
+        const projectDetails = await CacheManager.getProjectDetails(cachedProject.projectId, gcloudPath);
+        if (projectDetails) {
+          setCurrentProject(projectDetails);
+          // Add to recent projects
+          await RecentProjectsManager.addRecentProject(projectDetails);
+        }
+      }
+
+      // Load recent projects
+      const recent = await RecentProjectsManager.getRecentProjects();
+      setRecentProjects(recent);
+    } catch (error) {
+      console.error("Error loading project data:", error);
+      setError(error instanceof Error ? error.message : String(error));
+      showFailureToast("Failed to load project data", {
+>>>>>>> 21d012a (v0.2.32)
         message: error instanceof Error ? error.message : String(error),
       });
     } finally {
       setIsLoading(false);
     }
+<<<<<<< HEAD
   }
 
   useEffect(() => {
@@ -462,10 +516,95 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
               icon={{ source: Icon.List, tintColor: Color.Blue }}
               actions={
                 <ActionPanel>
+=======
+  };
+
+  const selectProject = async (projectId: string) => {
+    try {
+      const projectDetails = await CacheManager.getProjectDetails(projectId, gcloudPath);
+      if (projectDetails) {
+        CacheManager.saveSelectedProject(projectId);
+        await RecentProjectsManager.addRecentProject(projectDetails);
+        push(<ServicesView projectId={projectId} gcloudPath={gcloudPath} />);
+      }
+    } catch (error) {
+      console.error("Error selecting project:", error);
+      showFailureToast("Failed to select project", {
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
+  };
+
+  const selectNewProject = () => {
+    navigationCache.set("showProjectsList", "true");
+    pop();
+  };
+
+  if (error) {
+    return (
+      <List>
+        <List.EmptyView
+          title="Error"
+          description={error}
+          icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={loadProjectData} />
+              <Action title="Browse All Projects" icon={Icon.List} onAction={selectNewProject} />
+              <Action title="Login with Different Account" icon={Icon.Person} onAction={onLoginWithDifferentAccount} />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
+
+  return (
+    <List isLoading={isLoading}>
+      {currentProject && (
+        <List.Section title="Current Project">
+          <List.Item
+            title={currentProject.name || currentProject.id}
+            subtitle={currentProject.id}
+            icon={{ source: Icon.Star, tintColor: Color.Yellow }}
+            accessories={[{ text: "Current", icon: Icon.Star }]}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Open Services"
+                  icon={Icon.Forward}
+                  onAction={() => push(<ServicesView projectId={currentProject.id} gcloudPath={gcloudPath} />)}
+                />
+                <Action title="Browse All Projects" icon={Icon.List} onAction={selectNewProject} />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
+
+      {recentProjects.length > 0 && (
+        <List.Section title="Recently Used Projects">
+          {recentProjects.map((project) => (
+            <List.Item
+              key={project.id}
+              title={project.name}
+              subtitle={project.id}
+              icon={{ source: Icon.Clock, tintColor: Color.Blue }}
+              accessories={[
+                {
+                  text: new Date(project.lastUsedAt).toLocaleDateString(),
+                  icon: Icon.Clock,
+                },
+              ]}
+              actions={
+                <ActionPanel>
+                  <Action title="Select This Project" icon={Icon.Forward} onAction={() => selectProject(project.id)} />
+>>>>>>> 21d012a (v0.2.32)
                   <Action title="Browse All Projects" icon={Icon.List} onAction={selectNewProject} />
                 </ActionPanel>
               }
             />
+<<<<<<< HEAD
           </List.Section>
 
           <List.Section title="Configuration" subtitle="Customize your experience">
@@ -548,6 +687,21 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
           actions={
             <ActionPanel>
               <Action title="Browse Projects" onAction={selectNewProject} icon={Icon.List} />
+=======
+          ))}
+        </List.Section>
+      )}
+
+      {!currentProject && recentProjects.length === 0 && !isLoading && (
+        <List.EmptyView
+          title="No Recent Projects"
+          description="Select a project to get started"
+          icon={{ source: Icon.Document, tintColor: Color.Blue }}
+          actions={
+            <ActionPanel>
+              <Action title="Browse All Projects" icon={Icon.List} onAction={selectNewProject} />
+              <Action title="Login with Different Account" icon={Icon.Person} onAction={onLoginWithDifferentAccount} />
+>>>>>>> 21d012a (v0.2.32)
             </ActionPanel>
           }
         />

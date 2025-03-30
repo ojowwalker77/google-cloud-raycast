@@ -15,6 +15,10 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { exec } from "child_process";
 import { promisify } from "util";
 import fs from "fs";
+<<<<<<< HEAD
+=======
+import os from "os";
+>>>>>>> 21d012a (v0.2.32)
 import { showFailureToast } from "@raycast/utils";
 
 const execPromise = promisify(exec);
@@ -235,7 +239,11 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
         const updatedRules = currentRules.filter((rule) => rule.id !== ruleId);
 
         // Create a temporary JSON file with the updated lifecycle configuration
+<<<<<<< HEAD
         const tempFilePath = `/tmp/lifecycle-${bucketName}-${Date.now()}.json`;
+=======
+        const tempFilePath = `${os.tmpdir()}/lifecycle-${bucketName}-${Date.now()}.json`;
+>>>>>>> 21d012a (v0.2.32)
 
         const lifecycleConfig = {
           lifecycle: {
@@ -432,7 +440,11 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
       const updatedRules = [...currentRules, rule];
 
       // Create a temporary JSON file with the updated lifecycle configuration
+<<<<<<< HEAD
       const tempFilePath = `/tmp/lifecycle-${bucketName}-${Date.now()}.json`;
+=======
+      const tempFilePath = `${os.tmpdir()}/lifecycle-${bucketName}-${Date.now()}.json`;
+>>>>>>> 21d012a (v0.2.32)
 
       const lifecycleConfig = {
         lifecycle: {

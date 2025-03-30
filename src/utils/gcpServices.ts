@@ -8,7 +8,11 @@ export interface GCPServiceInfo {
   name: string;
   displayName: string;
   description: string;
+<<<<<<< HEAD
   category: string;
+=======
+  category: GCPServiceCategory;
+>>>>>>> 21d012a (v0.2.32)
   documentation?: string;
   console?: string;
   dependsOn?: string[];
@@ -544,7 +548,11 @@ export function getServicesByCategory(category: GCPServiceCategory): GCPServiceI
  * Get all available service categories
  * @returns Array of all service categories
  */
+<<<<<<< HEAD
 export function getAllCategories(): string[] {
+=======
+export function getAllCategories(): GCPServiceCategory[] {
+>>>>>>> 21d012a (v0.2.32)
   return Object.values(GCPServiceCategory);
 }
 

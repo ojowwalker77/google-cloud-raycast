@@ -362,7 +362,15 @@ export class IAMService {
       }));
     } catch (error: unknown) {
       console.error("Error getting custom roles:", error);
+<<<<<<< HEAD
       throw new Error(`Failed to get custom roles: ${error instanceof Error ? error.message : "Unknown error"}`);
+=======
+      showFailureToast({
+        title: "Failed to Get Custom Roles",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+      throw error;
+>>>>>>> 21d012a (v0.2.32)
     }
   }
 

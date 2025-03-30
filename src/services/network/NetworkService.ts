@@ -280,6 +280,10 @@ export class NetworkService {
         mtu,
         projectId: this.projectId,
       });
+<<<<<<< HEAD
+=======
+      return false;
+>>>>>>> 21d012a (v0.2.32)
     }
   }
 
@@ -473,6 +477,10 @@ export class NetworkService {
         options: addressOptions,
         projectId: this.projectId,
       });
+<<<<<<< HEAD
+=======
+      return false;
+>>>>>>> 21d012a (v0.2.32)
     }
   }
 
@@ -635,6 +643,10 @@ export class NetworkService {
         options: ruleOptions,
         projectId: this.projectId,
       });
+<<<<<<< HEAD
+=======
+      return false;
+>>>>>>> 21d012a (v0.2.32)
     }
   }
 
@@ -727,6 +739,10 @@ export class NetworkService {
         },
         projectId: this.projectId,
       });
+<<<<<<< HEAD
+=======
+      return false;
+>>>>>>> 21d012a (v0.2.32)
     }
   }
 

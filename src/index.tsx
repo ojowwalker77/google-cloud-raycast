@@ -2,6 +2,7 @@ import { ActionPanel, Action, List, showToast, Toast, Icon, Form, useNavigation,
 import { useState, useEffect } from "react";
 import { exec } from "child_process";
 import { promisify } from "util";
+<<<<<<< HEAD
 import ProjectView from "./ProjectView";
 import { StorageBucketView, StorageStatsView } from "./services/storage";
 import { ComputeInstancesView, ComputeDisksView } from "./services/compute";
@@ -10,23 +11,47 @@ import CachedProjectView from "./views/CachedProjectView";
 
 const execPromise = promisify(exec);
 const GCLOUD_PATH = "/usr/local/bin/gcloud";
+=======
+import { join } from "path";
+import ProjectView from "./views/ProjectView";
+import { StorageBucketView, StorageStatsView } from "./services/storage";
+import { ComputeInstancesView, ComputeDisksView } from "./services/compute";
+import { CacheManager, Project, CACHE_TTL } from "./utils/CacheManager";
+import CachedProjectView from "./views/CachedProjectView";
+import { authenticateWithBrowser } from "./gcloud";
+import { CommandPreferences } from "./common/types";
+import { isExpired } from "./utils/CacheManager";
+
+const execPromise = promisify(exec);
+const GCLOUD_PATH = join("/Users/jonataswalker/www/google-cloud-sdk", "bin", "gcloud");
+>>>>>>> 21d012a (v0.2.32)
 
 // Create a navigation cache instance
 const navigationCache = new Cache({ namespace: "navigation-state" });
 
+<<<<<<< HEAD
 interface Preferences {
   projectId?: string;
 }
 
+=======
+>>>>>>> 21d012a (v0.2.32)
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
   const [error, setError] = useState<string | null>(null);
+<<<<<<< HEAD
   const [preferences, setPreferences] = useState<Preferences>({});
   const [showCachedProjectView, setShowCachedProjectView] = useState(false);
   const [shouldNavigateToProject, setShouldNavigateToProject] = useState<string | null>(null);
   const { push } = useNavigation();
+=======
+  const [preferences, setPreferences] = useState<CommandPreferences>({ projectId: "" });
+  const [showCachedProjectView, setShowCachedProjectView] = useState(false);
+  const [shouldNavigateToProject, setShouldNavigateToProject] = useState<string | null>(null);
+  const { push, pop } = useNavigation();
+>>>>>>> 21d012a (v0.2.32)
 
   // Handle navigation to project with useEffect
   useEffect(() => {
@@ -45,12 +70,22 @@ export default function Command() {
       await execPromise(`${GCLOUD_PATH} --version`);
       initializeFromCache();
     } catch (error) {
+<<<<<<< HEAD
       setIsLoading(false);
       setError("Google Cloud SDK not found. Please install it using Homebrew: brew install google-cloud-sdk");
       showToast({
         style: Toast.Style.Failure,
         title: "Google Cloud SDK not found",
         message: "Please install it using Homebrew",
+=======
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      setError(`Google Cloud SDK not found at ${GCLOUD_PATH}. Please install it and try again.`);
+      setIsLoading(false);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Google Cloud SDK not found",
+        message: errorMessage,
+>>>>>>> 21d012a (v0.2.32)
       });
     }
   }
@@ -117,19 +152,43 @@ export default function Command() {
     }
 
     try {
+<<<<<<< HEAD
       // Only check auth status, don't make changes that could log the user out
+=======
+      // Check if we have a valid cached auth status first
+      const cachedAuth = CacheManager.getAuthStatus();
+      if (cachedAuth && cachedAuth.isAuthenticated && !isExpired(cachedAuth.timestamp, CACHE_TTL.AUTH)) {
+        setIsAuthenticated(true);
+        if (!silent && loadingToast) {
+          loadingToast.hide();
+          showToast({
+            style: Toast.Style.Success,
+            title: "Authenticated",
+            message: cachedAuth.user,
+          });
+        }
+        fetchProjects(silent);
+        return;
+      }
+
+      // If no valid cache, check with gcloud
+>>>>>>> 21d012a (v0.2.32)
       const { stdout } = await execPromise(
         `${GCLOUD_PATH} auth list --format="value(account)" --filter="status=ACTIVE"`,
       );
 
       if (stdout.trim()) {
         setIsAuthenticated(true);
+<<<<<<< HEAD
 
         // Only update cache if not already authenticated to prevent unexpected cache updates
         if (!isAuthenticated) {
           // Cache the authentication status
           CacheManager.saveAuthStatus(true, stdout.trim());
         }
+=======
+        CacheManager.saveAuthStatus(true, stdout.trim());
+>>>>>>> 21d012a (v0.2.32)
 
         if (!silent && loadingToast) {
           loadingToast.hide();
@@ -144,11 +203,15 @@ export default function Command() {
       } else {
         setIsAuthenticated(false);
         setIsLoading(false);
+<<<<<<< HEAD
 
         // Clear auth cache only if we were previously authenticated
         if (isAuthenticated) {
           CacheManager.clearAuthCache();
         }
+=======
+        CacheManager.clearAuthCache();
+>>>>>>> 21d012a (v0.2.32)
 
         if (!silent && loadingToast) {
           loadingToast.hide();
@@ -160,6 +223,7 @@ export default function Command() {
         }
       }
     } catch (error: unknown) {
+<<<<<<< HEAD
       // Only change auth state if there's a definitive failure
       const errorMessage = error instanceof Error ? error.message : String(error);
       if (errorMessage.includes("not logged in") || errorMessage.includes("no active account")) {
@@ -169,6 +233,12 @@ export default function Command() {
         if (isAuthenticated) {
           CacheManager.clearAuthCache();
         }
+=======
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes("not logged in") || errorMessage.includes("no active account")) {
+        setIsAuthenticated(false);
+        CacheManager.clearAuthCache();
+>>>>>>> 21d012a (v0.2.32)
       }
 
       setIsLoading(false);
@@ -274,15 +344,25 @@ export default function Command() {
 
   async function authenticate() {
     try {
+<<<<<<< HEAD
       // console.log("Starting Google Cloud authentication process");
 
+=======
+>>>>>>> 21d012a (v0.2.32)
       // Show a dedicated authentication view that will handle the process
       push(
         <AuthenticationView
           gcloudPath={GCLOUD_PATH}
           onAuthenticated={() => {
             setIsAuthenticated(true);
+<<<<<<< HEAD
             fetchProjects();
+=======
+            // Fetch projects with silent=false to show loading indicators
+            fetchProjects(false);
+            // Cache auth status immediately - use an empty string as account until we get the real one
+            CacheManager.saveAuthStatus(true, "");
+>>>>>>> 21d012a (v0.2.32)
           }}
         />,
       );
@@ -387,6 +467,7 @@ export default function Command() {
   }
 
   function AuthenticationView({ gcloudPath, onAuthenticated }: AuthenticationViewProps) {
+<<<<<<< HEAD
     const [verificationCode, setVerificationCode] = useState("");
     const [error, setError] = useState<string | null>(null);
 
@@ -430,6 +511,39 @@ export default function Command() {
           onChange={setVerificationCode}
           error={error || undefined}
           autoFocus
+=======
+    const [error, setError] = useState<string | null>(null);
+    const [isAuthenticating, setIsAuthenticating] = useState(false);
+
+    async function startAuthentication() {
+      setIsAuthenticating(true);
+      setError(null);
+      try {
+        await authenticateWithBrowser(gcloudPath);
+        onAuthenticated();
+        pop();
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        setError(`Failed to authenticate: ${errorMessage}`);
+        setIsAuthenticating(false);
+      }
+    }
+
+    // Start authentication automatically when the component mounts
+    useEffect(() => {
+      startAuthentication();
+    }, []);
+
+    return (
+      <Form isLoading={isAuthenticating}>
+        <Form.Description
+          title="Google Cloud Authentication"
+          text={
+            isAuthenticating
+              ? "Opening browser for authentication..."
+              : error || "Authentication in progress..."
+          }
+>>>>>>> 21d012a (v0.2.32)
         />
       </Form>
     );
@@ -439,10 +553,16 @@ export default function Command() {
   async function loginWithDifferentAccount() {
     // Clear auth cache first
     CacheManager.clearAuthCache();
+<<<<<<< HEAD
+=======
+    CacheManager.clearProjectCache();
+    CacheManager.clearProjectsListCache();
+>>>>>>> 21d012a (v0.2.32)
 
     // First show toast for revoking current credentials
     const revokingToast = await showToast({
       style: Toast.Style.Animated,
+<<<<<<< HEAD
       title: "Logging out current account...",
       message: "Revoking current credentials",
     });
@@ -453,10 +573,18 @@ export default function Command() {
       await execPromise(`${GCLOUD_PATH} auth revoke --all --quiet`);
       revokingToast.hide();
 
+=======
+      title: "Preparing for new login...",
+      message: "Please wait",
+    });
+
+    try {
+>>>>>>> 21d012a (v0.2.32)
       // Show the authentication view
       push(
         <AuthenticationView
           gcloudPath={GCLOUD_PATH}
+<<<<<<< HEAD
           onAuthenticated={() => {
             setIsAuthenticated(true);
             // Clear cached project to avoid confusion with the new account
@@ -464,6 +592,45 @@ export default function Command() {
             // Reset state and navigation
             setShowCachedProjectView(false);
             fetchProjects();
+=======
+          onAuthenticated={async () => {
+            try {
+              // Get the new user's email
+              const { stdout } = await execPromise(
+                `${GCLOUD_PATH} auth list --format="value(account)" --filter="status=ACTIVE"`
+              );
+              const userEmail = stdout.trim();
+              
+              if (!userEmail) {
+                throw new Error("Failed to get authenticated user email");
+              }
+
+              // Update state and cache
+              setIsAuthenticated(true);
+              CacheManager.saveAuthStatus(true, userEmail);
+              
+              // Reset view state
+              setShowCachedProjectView(false);
+              
+              // Fetch projects with loading indicators
+              fetchProjects(false);
+
+              // Show success message
+              showToast({
+                style: Toast.Style.Success,
+                title: "Successfully logged in",
+                message: `Logged in as ${userEmail}`,
+              });
+            } catch (error) {
+              const errorMessage = error instanceof Error ? error.message : String(error);
+              console.error("Error after authentication:", errorMessage);
+              showToast({
+                style: Toast.Style.Failure,
+                title: "Error after login",
+                message: errorMessage,
+              });
+            }
+>>>>>>> 21d012a (v0.2.32)
           }}
         />,
       );
@@ -478,6 +645,11 @@ export default function Command() {
         title: "Authentication failed",
         message: errorMessage,
       });
+<<<<<<< HEAD
+=======
+    } finally {
+      revokingToast?.hide();
+>>>>>>> 21d012a (v0.2.32)
     }
   }
 

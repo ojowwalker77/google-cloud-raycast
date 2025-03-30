@@ -105,7 +105,11 @@ export default function ComputeDisksView({ projectId, gcloudPath }: ComputeDisks
   const refreshDisks = useCallback(async () => {
     if (!service) return;
     await fetchDisks(service);
+<<<<<<< HEAD
   }, [service, selectedZone]);
+=======
+  }, [service, fetchDisks]);
+>>>>>>> 21d012a (v0.2.32)
 
   const handleZoneChange = async (newZone: string | undefined) => {
     // Convert "all" to undefined for filtering

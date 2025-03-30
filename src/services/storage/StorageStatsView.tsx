@@ -1,6 +1,10 @@
 import { ActionPanel, Action, List, showToast, Toast, useNavigation, Icon, Detail, Color } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+<<<<<<< HEAD
 import { useState, useEffect } from "react";
+=======
+import { useState, useEffect, useCallback } from "react";
+>>>>>>> 21d012a (v0.2.32)
 import { executeGcloudCommand } from "../../gcloud";
 
 interface StorageStatsViewProps {
@@ -47,11 +51,15 @@ export default function StorageStatsView({ projectId, gcloudPath, bucketName }: 
   const [debugInfo, setDebugInfo] = useState<string>("");
   const { push } = useNavigation();
 
+<<<<<<< HEAD
   useEffect(() => {
     fetchStorageStats();
   }, []);
 
   async function fetchStorageStats() {
+=======
+  const fetchStorageStats = useCallback(async () => {
+>>>>>>> 21d012a (v0.2.32)
     setIsLoading(true);
     setError(null);
 
@@ -135,7 +143,11 @@ export default function StorageStatsView({ projectId, gcloudPath, bucketName }: 
 
         // Get list of buckets
         const bucketsCommand = `storage buckets list --project=${projectId} --format=json`;
+<<<<<<< HEAD
         const buckets = await executeGcloudCommand(gcloudPath, bucketsCommand);
+=======
+        const buckets = await executeGcloudCommand(gcloudPath, bucketsCommand, projectId);
+>>>>>>> 21d012a (v0.2.32)
 
         if (Array.isArray(buckets) && buckets.length > 0) {
           // Process each bucket
@@ -211,7 +223,15 @@ export default function StorageStatsView({ projectId, gcloudPath, bucketName }: 
     } finally {
       setIsLoading(false);
     }
+<<<<<<< HEAD
   }
+=======
+  }, [projectId, gcloudPath, bucketName]);
+
+  useEffect(() => {
+    fetchStorageStats();
+  }, [fetchStorageStats]);
+>>>>>>> 21d012a (v0.2.32)
 
   function formatBytes(bytes: number, decimals = 2): string {
     if (bytes === 0) return "0 Bytes";

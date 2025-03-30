@@ -14,8 +14,13 @@
   "commands": [
     {
       "name": "index",
+<<<<<<< HEAD
       "title": "Manage Google Cloud",
       "subtitle": "Manage your Google Cloud resources without opening a browser",
+=======
+      "title": "Google Cloud Extension",
+      "subtitle": "Manage Google Cloud",
+>>>>>>> 21d012a (v0.2.32)
       "description": "Manage your Google Cloud resources",
       "mode": "view",
       "screenshots": [
@@ -32,6 +37,44 @@
           "title": "Resource Management"
         }
       ]
+<<<<<<< HEAD
+=======
+    },
+    {
+      "name": "settings",
+      "title": "Settings",
+      "subtitle": "Configure Google Cloud Extension",
+      "description": "Manage your Google Cloud CLI settings and preferences",
+      "mode": "view"
+    },
+    {
+      "name": "storage",
+      "title": "Cloud Storage",
+      "subtitle": "Manage Cloud Storage",
+      "description": "Quick access to manage your Google Cloud Storage buckets and objects",
+      "mode": "view"
+    },
+    {
+      "name": "iam",
+      "title": "Cloud IAM",
+      "subtitle": "Manage IAM & Permissions",
+      "description": "Quick access to manage your Google Cloud IAM permissions and roles",
+      "mode": "view"
+    },
+    {
+      "name": "compute",
+      "title": "Compute Engine",
+      "subtitle": "Google Cloud",
+      "description": "Quick access to Compute Engine instances and disks",
+      "mode": "view"
+    },
+    {
+      "name": "network",
+      "title": "Cloud Network",
+      "subtitle": "Google Cloud",
+      "description": "Quick access to VPC networks, IP addresses, and firewall rules",
+      "mode": "view"
+>>>>>>> 21d012a (v0.2.32)
     }
   ],
   "preferences": [

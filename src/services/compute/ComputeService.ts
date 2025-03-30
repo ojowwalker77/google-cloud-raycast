@@ -253,6 +253,13 @@ export class ComputeService {
       const result = await executeGcloudCommand(this.gcloudPath, command, this.projectId);
       return result ? (result as Disk) : null;
     } catch (error: unknown) {
+<<<<<<< HEAD
+=======
+      showFailureToast({
+        title: "Failed to Fetch Disk",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+>>>>>>> 21d012a (v0.2.32)
       return null;
     }
   }

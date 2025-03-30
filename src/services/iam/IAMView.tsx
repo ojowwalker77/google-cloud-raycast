@@ -12,9 +12,21 @@ import {
   Form,
 } from "@raycast/api";
 import { useState, useEffect, useMemo } from "react";
+<<<<<<< HEAD
 import { IAMService, IAMPrincipal, IAMRole } from "./IAMService";
 import { showFailureToast } from "@raycast/utils";
 import { predefinedRoles } from "../../utils/iamRoles";
+=======
+import { exec } from "child_process";
+import { promisify } from "util";
+import { IAMService, IAMPrincipal, IAMRole } from "./IAMService";
+import { showFailureToast } from "@raycast/utils";
+import { predefinedRoles } from "../../utils/iamRoles";
+import { CacheManager, Project } from "../../utils/CacheManager";
+import ProjectQuickSwitcher from "../../common/ProjectQuickSwitcher";
+
+const execPromise = promisify(exec);
+>>>>>>> 21d012a (v0.2.32)
 
 interface IAMViewProps {
   projectId: string;
@@ -30,9 +42,17 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+<<<<<<< HEAD
   const { push, pop } = useNavigation();
 
   const iamService = useMemo(() => new IAMService(gcloudPath, projectId), [gcloudPath, projectId]);
+=======
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [selectedProjectId, setSelectedProjectId] = useState<string>(projectId);
+  const { push, pop } = useNavigation();
+
+  const iamService = useMemo(() => new IAMService(gcloudPath, selectedProjectId), [gcloudPath, selectedProjectId]);
+>>>>>>> 21d012a (v0.2.32)
 
   // Group predefined roles by service for the dropdown
   const rolesByService = useMemo(() => {
@@ -63,9 +83,55 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
       .map(([, service]) => service);
   }, []);
 
+<<<<<<< HEAD
   useEffect(() => {
     fetchIAMPolicy();
   }, [iamService]);
+=======
+  // Helper function to extract service from role name
+  const getRoleService = (role: string): string => {
+    if (role.startsWith("roles/")) {
+      const parts = role.split("/")[1].split(".");
+      if (parts.length > 1) {
+        return parts[0]; // Return the service part (e.g., "storage" from "storage.admin")
+      } else {
+        return "project"; // For basic roles like roles/owner, roles/editor
+      }
+    }
+    return "custom"; // For custom roles
+  };
+
+  useEffect(() => {
+    loadProjects();
+    fetchIAMPolicy();
+  }, [selectedProjectId]);
+
+  async function loadProjects() {
+    try {
+      const cachedProjects = CacheManager.getProjectsList();
+      if (cachedProjects) {
+        setProjects(cachedProjects.projects);
+      } else {
+        const { stdout } = await execPromise(`${gcloudPath} projects list --format=json`);
+        const projectsData = JSON.parse(stdout);
+        const formattedProjects = projectsData.map((project: any) => ({
+          id: project.projectId,
+          name: project.name,
+          projectNumber: project.projectNumber,
+          createTime: project.createTime || new Date().toISOString(),
+        }));
+        setProjects(formattedProjects);
+        CacheManager.saveProjectsList(formattedProjects);
+      }
+    } catch (error) {
+      console.error("Error loading projects:", error);
+      showFailureToast("Failed to load projects", {
+        title: "Failed to load projects",
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+>>>>>>> 21d012a (v0.2.32)
 
   async function fetchIAMPolicy() {
     setIsLoading(true);
@@ -130,9 +196,15 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
         return false;
       }
 
+<<<<<<< HEAD
       // Filter by service
       if (selectedService && !principal.roles.some((role) => role.role.includes(selectedService))) {
         return false;
+=======
+      // Filter by service using exact service matching
+      if (selectedService) {
+        return principal.roles.some((role) => getRoleService(role.role) === selectedService.toLowerCase());
+>>>>>>> 21d012a (v0.2.32)
       }
 
       return true;
@@ -666,12 +738,16 @@ ${resourceName ? `- Resource Name: ${resourceName}` : "- No specific resource na
       onSearchTextChange={setSearchText}
       navigationTitle={resourceName ? `Manage Permissions for ${resourceName}` : "Manage Permissions"}
       searchBarAccessory={
+<<<<<<< HEAD
         <List.Dropdown tooltip="Filter by Member Type" value={selectedType || ""} onChange={setSelectedType}>
           <List.Dropdown.Item title="All Types" value="" />
           {principalTypes.map((type) => (
             <List.Dropdown.Item key={type} title={iamService.formatMemberType(type)} value={type} />
           ))}
         </List.Dropdown>
+=======
+        <ProjectQuickSwitcher projectId={projectId} gcloudPath={gcloudPath} onProjectChange={setSelectedProjectId} />
+>>>>>>> 21d012a (v0.2.32)
       }
       isShowingDetail
       actions={
@@ -685,9 +761,12 @@ ${resourceName ? `- Resource Name: ${resourceName}` : "- No specific resource na
             shortcut={{ modifiers: ["cmd"], key: "r" }}
           />
           <Action title="Show Debug Info" icon={Icon.Terminal} onAction={showDebugInfo} />
+<<<<<<< HEAD
           {selectedType && (
             <Action title="Clear Type Filter" icon={Icon.XmarkCircle} onAction={() => setSelectedType(null)} />
           )}
+=======
+>>>>>>> 21d012a (v0.2.32)
           {selectedService && (
             <Action title="Clear Service Filter" icon={Icon.XmarkCircle} onAction={() => setSelectedService(null)} />
           )}
@@ -703,6 +782,7 @@ ${resourceName ? `- Resource Name: ${resourceName}` : "- No specific resource na
           icon={{ source: Icon.Person }}
         />
       ) : (
+<<<<<<< HEAD
         principalTypes
           .filter((type) => !selectedType || type === selectedType)
           .map((type) => {
@@ -761,6 +841,51 @@ ${resourceName ? `- Resource Name: ${resourceName}` : "- No specific resource na
               </List.Section>
             );
           })
+=======
+        principals.map((principal) => (
+          <List.Item
+            key={`${principal.type}-${principal.id}`}
+            title={principal.id || principal.type}
+            icon={getMemberIcon(principal.type)}
+            detail={
+              <List.Item.Detail
+                metadata={
+                  <List.Item.Detail.Metadata>
+                    <List.Item.Detail.Metadata.Label title="Type" text={principal.displayName} />
+                    <List.Item.Detail.Metadata.Label title="ID" text={principal.id} />
+                    <List.Item.Detail.Metadata.Separator />
+                    <List.Item.Detail.Metadata.Label title="Roles" text={`${principal.roles.length}`} />
+                    {principal.roles.map((role, index) => (
+                      <List.Item.Detail.Metadata.Label
+                        key={`role-${index}`}
+                        title={role.title}
+                        text={role.role}
+                        icon={getRoleIcon(role.role)}
+                      />
+                    ))}
+                  </List.Item.Detail.Metadata>
+                }
+              />
+            }
+            actions={
+              <ActionPanel>
+                <Action title="View Details" icon={Icon.Eye} onAction={() => showPrincipalDetails(principal)} />
+                <Action title="Add Role" icon={Icon.Plus} onAction={() => showAddRoleForm(principal)} />
+                <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={fetchIAMPolicy} />
+                {principal.roles.map((role) => (
+                  <Action
+                    key={`remove-${role.role}`}
+                    title={`Remove from ${role.title}`}
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    onAction={() => removeMember(principal, role)}
+                  />
+                ))}
+              </ActionPanel>
+            }
+          />
+        ))
+>>>>>>> 21d012a (v0.2.32)
       )}
     </List>
   );
