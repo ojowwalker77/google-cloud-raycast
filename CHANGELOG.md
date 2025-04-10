@@ -1,19 +1,4 @@
-<<<<<<< HEAD
 # G-Cloud  Changelog
-
-## [0.1.29] - {PR_MERGE_DATE}
-- Initial release
-- Google Cloud IAM management features
-- Cloud Storage management features
-- Support for viewing and managing cloud resources
-- Added Network Services
-- Added Compute Services
-- Improved overall performance
-- Improved overall UI
-- Added error recovery and retry mechanisms
-- Small Bug Fixes
-=======
-# G-Cloud Changelog
 
 ## [0.2.32] - {PR_MERGE_DATE}
 - Feature: Cloud Network management features
@@ -39,5 +24,3 @@
 - Error recovery and retry mechanisms
 - Cache and Storage features to improve performance
 
-
->>>>>>> 21d012a (v0.2.32)
